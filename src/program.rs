@@ -4,6 +4,9 @@ use crate::shell;
 use crate::window;
 use crate::{Element, Executor, Result, Settings, Subscription, Task};
 
+#[cfg(feature = "crossterm")]
+use crate::crossterm;
+
 pub use crate::shell::program::{Appearance, DefaultStyle};
 
 /// The internal definition of a [`Program`].
@@ -162,6 +165,7 @@ pub trait Program: Sized {
             }
         }
 
+
         #[allow(clippy::needless_update)]
         let renderer_settings = crate::graphics::Settings {
             default_font: settings.default_font,
@@ -174,24 +178,114 @@ pub trait Program: Sized {
             ..crate::graphics::Settings::default()
         };
 
-        Ok(shell::program::run::<
-            Instance<Self, I>,
-            <Self::Renderer as compositor::Default>::Compositor,
-        >(
-            Settings {
+        let settings = Settings {
                 id: settings.id,
                 fonts: settings.fonts,
                 default_font: settings.default_font,
                 default_text_size: settings.default_text_size,
                 antialiasing: settings.antialiasing,
-            }
-            .into(),
+                terminal: settings.terminal,
+        };
+
+        Ok(iced_crossterm::program::run::<
+            Instance<Self, I>,
+            <Self::Renderer as compositor::Default>::Compositor,
+        >(
+            settings.into(),
             renderer_settings,
             window_settings,
             (self, initialize),
         )?)
     }
 }
+
+/*
+#[cfg(feature = "crossterm")]
+fn select_renderer(settings: String, renderer_settings: String, window_settings: String, flags: String) {
+    match settings.terminal {
+        UseTUI::Always => {
+            iced_crossterm::program::run::<
+                Instance<Self, I>,
+                <Self::Renderer as compositor::Default>::Compositor,
+            >(
+                settings.into(),
+                renderer_settings,
+                window_settings,
+                (self, initialize),
+            )
+        },
+        UseTUI::Never => {
+            shell::program::run::<
+                Instance<Self, I>,
+                <Self::Renderer as compositor::Default>::Compositor,
+            >(
+                settings.into(),
+                renderer_settings,
+                window_settings,
+                (self, initialize),
+            )
+        },
+        /// TODO only catch on failed to initialize shell, currently will launch a terminal after any error
+        UseTUI::WhenMissingDisplay => {
+            if let Err(e) = shell::program::run::<
+                Instance<Self, I>,
+                <Self::Renderer as compositor::Default>::Compositor,
+            >(
+                settings.into(),
+                renderer_settings,
+                window_settings,
+                (self, initialize),
+            ) {
+                iced_crossterm::program::run::<
+                    Instance<Self, I>,
+                    <Self::Renderer as compositor::Default>::Compositor,
+                >(
+                    settings.into(),
+                    renderer_settings,
+                    window_settings,
+                    (self, initialize),
+                )
+            }
+        },
+        /// TODO only catch on failed to initialize TUI, currently will launch a GUI after any error
+        UseTUI::AlwaysWithWindowFallback => {
+            if let Err(e) = iced_crossterm::program::run::<
+                Instance<Self, I>,
+                <Self::Renderer as compositor::Default>::Compositor,
+            >(
+                settings.into(),
+                renderer_settings,
+                window_settings,
+                (self, initialize),
+            ) {
+                shell::program::run::<
+                    Instance<Self, I>,
+                    <Self::Renderer as compositor::Default>::Compositor,
+                >(
+                    settings.into(),
+                    renderer_settings,
+                    window_settings,
+                    (self, initialize),
+                )
+            }
+        },
+    }
+}
+
+#[inline]
+#[cfg(not(feature = "crossterm"))]
+fn select_renderer(settings: String, renderer_settings: String, window_settings: String, flags: String) {
+    shell::program::run::<
+        Instance<Self, I>,
+        <Self::Renderer as compositor::Default>::Compositor,
+    >(
+        settings.into(),
+        renderer_settings,
+        window_settings,
+        (self, initialize),
+    )
+}
+*/
 
 pub fn with_title<P: Program>(
     program: P,

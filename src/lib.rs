@@ -477,6 +477,9 @@ use iced_winit as shell;
 use iced_winit::core;
 use iced_winit::runtime;
 
+#[cfg(feature = "crossterm")]
+pub use iced_crossterm as crossterm;
+
 pub use iced_futures::futures;
 pub use iced_futures::stream;
 

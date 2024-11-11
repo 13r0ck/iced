@@ -1,12 +1,13 @@
 use crate::futures;
 use crate::graphics;
 use crate::shell;
+use crate::crossterm;
 
 /// An error that occurred while running an application.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// The event loop executor could not be created.
-    #[error("the event loop executor could not be created")]
+    #[error("the event loop executor could not be created. Enable the 'crossterm' or 'crossterm-only' feature to use a TUI not a windowing GUI.")]
     EventLoopCreationFailed(Box<dyn std::error::Error + Send + Sync>),
 
     /// The futures executor could not be created.
@@ -20,6 +21,11 @@ pub enum Error {
     /// The application graphics context could not be created.
     #[error("the application graphics context could not be created")]
     GraphicsCreationFailed(graphics::Error),
+
+    /// Temporary filler to make type system happy.
+    #[cfg(feature = "crossterm")]
+    #[error("Temporary filler to make type system happy.")]
+    CrosstermIo(std::io::Error),
 }
 
 impl From<shell::Error> for Error {
@@ -37,6 +43,15 @@ impl From<shell::Error> for Error {
             shell::Error::GraphicsCreationFailed(error) => {
                 Error::GraphicsCreationFailed(error)
             }
+        }
+    }
+}
+
+#[cfg(feature = "crossterm")]
+impl From<crossterm::Error> for Error {
+    fn from(error: crossterm::Error) -> Error {
+        match error {
+            crossterm::Error::StdIo(e) => Error::CrosstermIo(e)
         }
     }
 }

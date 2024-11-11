@@ -22,11 +22,13 @@ all-features = true
 maintenance = { status = "actively-developed" }
 
 [features]
-default = ["wgpu", "tiny-skia", "fira-sans", "auto-detect-theme"]
+default = ["fira-sans", "auto-detect-theme", "winit"]
 # Enable the `wgpu` GPU-accelerated renderer backend
 wgpu = ["iced_renderer/wgpu", "iced_widget/wgpu"]
 # Enable the `tiny-skia` software renderer backend
 tiny-skia = ["iced_renderer/tiny-skia"]
+# Enable the `crossterm` TUI renderer backend. Confgure with [`settings::Settings`]
+crossterm = ["iced_crossterm"]
 # Enables the `Image` widget
 image = ["image-without-codecs", "image/default"]
 # Enables the `Image` widget, without any built-in codecs of the `image` crate
@@ -41,6 +43,8 @@ qr_code = ["iced_widget/qr_code"]
 markdown = ["iced_widget/markdown"]
 # Enables lazy widgets
 lazy = ["iced_widget/lazy"]
+# Enables winit. Required for windowed apps.
+winit = ["iced_winit"]
 # Enables a debug view in native platforms (press F12)
 debug = ["iced_winit/debug"]
 # Enables `tokio` as the `executor::Default` on native platforms
@@ -75,6 +79,9 @@ iced_renderer.workspace = true
 iced_widget.workspace = true
 iced_winit.features = ["program"]
 iced_winit.workspace = true
+iced_winit.optional = true
+iced_crossterm.workspace = true
+iced_crossterm.optional = true
 
 iced_highlighter.workspace = true
 iced_highlighter.optional = true
@@ -112,6 +119,7 @@ members = [
     "renderer",
     "runtime",
     "tiny_skia",
+    "crossterm",
     "wgpu",
     "widget",
     "winit",
@@ -138,6 +146,7 @@ iced_highlighter = { version = "0.14.0-dev", path = "highlighter" }
 iced_renderer = { version = "0.14.0-dev", path = "renderer" }
 iced_runtime = { version = "0.14.0-dev", path = "runtime" }
 iced_tiny_skia = { version = "0.14.0-dev", path = "tiny_skia" }
+iced_crossterm = { version = "0.14.0-dev", path = "crossterm" }
 iced_wgpu = { version = "0.14.0-dev", path = "wgpu" }
 iced_widget = { version = "0.14.0-dev", path = "widget" }
 iced_winit = { version = "0.14.0-dev", path = "winit" }
@@ -175,6 +184,7 @@ syntect = "5.1"
 sysinfo = "0.30"
 thiserror = "1.0"
 tiny-skia = "0.11"
+crossterm = "0.28"
 tokio = "1.0"
 tracing = "0.1"
 unicode-segmentation = "1.0"
