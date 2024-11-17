@@ -189,7 +189,7 @@ where
 
     let event_loop = EventLoop::with_user_event()
         .build()
-        .expect("Create event loop");
+        .map_err(Error::EventLoopCreationFailed)?;
 
     let (proxy, worker) = Proxy::new(event_loop.create_proxy());
 

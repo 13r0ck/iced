@@ -5,6 +5,10 @@ use crate::shell;
 /// An error that occurred while running an application.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// The event loop executor could not be created.
+    #[error("the event loop executor could not be created")]
+    EventLoopCreationFailed(Box<dyn std::error::Error + Send + Sync>),
+
     /// The futures executor could not be created.
     #[error("the futures executor could not be created")]
     ExecutorCreationFailed(futures::io::Error),
@@ -21,6 +25,9 @@ pub enum Error {
 impl From<shell::Error> for Error {
     fn from(error: shell::Error) -> Error {
         match error {
+            shell::Error::EventLoopCreationFailed(error) => {
+                Error::EventLoopCreationFailed(Box::new(error))
+            }
             shell::Error::ExecutorCreationFailed(error) => {
                 Error::ExecutorCreationFailed(error)
             }

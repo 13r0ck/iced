@@ -4,6 +4,10 @@ use crate::graphics;
 /// An error that occurred while running an application.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// The event loop could not be created
+    #[error("the event loop could not be created")]
+    EventLoopCreationFailed(winit::error::EventLoopError),
+
     /// The futures executor could not be created.
     #[error("the futures executor could not be created")]
     ExecutorCreationFailed(futures::io::Error),
