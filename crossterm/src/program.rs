@@ -1,10 +1,12 @@
 use iced_winit::{
-    Program, graphics,
+    Program, graphics, Proxy,
     program::DefaultStyle,
 };
 use iced_graphics::Compositor;
 use iced_core::window;
 use crate::{Error, Settings};
+use iced_futures::{Executor, Runtime};
+use iced_runtime::user_interface::UserInterface;
 
 use crossterm::{
     cursor, ExecutableCommand, QueueableCommand, style,
@@ -40,5 +42,14 @@ where
     }
   }
   stdout.flush()?;
+
+
+  let (program, task) = P::new(flags);
+  let view = program.view(window::Id::unique());
+  let cache = Cache::default();
+  let renderer = Renderer::new();
+
+  let user_interface = UserInterface::build(view, "foo", cache, renderer);
+  println!("{:?}", program.view(window::Id::unique()));
   Ok(())
 }

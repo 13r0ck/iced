@@ -18,6 +18,7 @@ workspace = true
 
 [dependencies]
 iced_graphics.workspace = true
+iced_futures.workspace = true
 iced_winit.workspace = true
 iced_core.workspace = true
 crossterm.workspace = true
